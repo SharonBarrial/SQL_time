@@ -1,203 +1,202 @@
-﻿--solucion ejemplo pc2
-Use Prueba3
-go
---La empresa cuenta con distintos planes tarifarios. Los planes tarifarios tienen un código único, nombre,
---fecha de creación, empleado responsable, cantidad de MB, cantidad de minutos.
+Use TechNova
+Go
 
-create table planes_tarifarios 
-(
-codigo int primary key not null,
-nombre varchar (250) not null,
-fecha_creación date not null,
-empleado varchar (250) not null,
-cantidad_mb int not null,
-cant_minutos int not null,
+--(Basic) Mostrar los cursos m�s populares de nuestro sistema
+CREATE PROCEDURE cursos_populares
+AS
+BEGIN
+	SELECT
+		sc.servicio_curso_ID,
+		sc.titulo_curso,
+		sc.duracion_curso,
+		COUNT(lc.cantidad_curso_completo) AS cantidad_logros
+	FROM
+		servicio_curso sc
+	JOIN logro_servicio_curso lc ON sc.servicio_curso_ID = lc.servicio_curso_servicio_curso_ID
+	GROUP BY
+	sc.servicio_curso_ID,
+	sc.titulo_curso,
+	sc.duracion_curso
+	ORDER BY cantidad_logros DESC
+	--LIMIT 5
+END;
+
+exec cursos_populares;
+
+
+
+--(intermedia) Mostrar historial de pagos 
+--CREATE FUNCTION historial_transacciones_por_usuario(@usuario_id INT)
+--RETURNS TABLE (
+--    transaccion_ID INT,
+--    numero_transaccion INT,
+--    monto_transaccion MONEY,
+--    fecha_transaccion DATE,
+--    hora_transaccion TIME,
+--    curso_correspondiente VARCHAR(250)
+--)
+--AS
+--BEGIN
+--    RETURN (
+--        SELECT
+--            T.transaccion_ID,
+--            T.numero_transaccion,
+--            T.monto_transaccion,
+--            T.fecha_transaccion,
+--            T.hora_transaccion,
+--            SC.titulo_curso AS curso_correspondiente
+--        FROM
+--            transaccion T
+--            INNER JOIN cuenta_bancaria CB ON T.cuenta_bancaria_cuenta_bancaria_ID = CB.cuenta_bancaria_ID
+--            INNER JOIN servicio_administracion_financiera SAF ON CB.banco_banco_ID = SAF.banco_banco_ID
+--            INNER JOIN usuario U ON SAF.usuario_usuario_ID = U.usuario_ID
+--            LEFT JOIN servicio_curso SC ON U.usuario_ID = SC.usuario_usuario_ID
+--        WHERE
+--            U.usuario_ID = @usuario_ID
+--    );
+--END;
+CREATE FUNCTION historial_transacciones_por_usuario(@usuario_id INT)
+RETURNS @Tabla TABLE (
+    transaccion_ID INT,
+    numero_transaccion INT,
+    monto_transaccion MONEY,
+    fecha_transaccion DATE,
+    hora_transaccion TIME,
+    curso_correspondiente VARCHAR(250)
 )
+AS
+BEGIN
+	INSERT INTO @Tabla
+        SELECT
+            T.transaccion_ID,
+            T.numero_transaccion,
+            T.monto_transaccion,
+            T.fecha_transaccion,
+            T.hora_transaccion,
+            SC.titulo_curso AS curso_correspondiente
+        FROM
+            transaccion T
+            INNER JOIN cuenta_bancaria CB ON T.cuenta_bancaria_cuenta_bancaria_ID = CB.cuenta_bancaria_ID
+            INNER JOIN servicio_administracion_financiera SAF ON CB.banco_banco_ID = SAF.banco_banco_ID
+            INNER JOIN usuario U ON SAF.usuario_usuario_ID = U.usuario_ID
+            LEFT JOIN servicio_curso SC ON U.usuario_ID = SC.usuario_usuario_ID
+        WHERE
+            U.usuario_ID = @usuario_ID
+			return
+END;
 
---Del fabricante se conoce su código y nombre. 
---Cada fabricante tiene por lo menos un modelo asignado. Cada modelo de celular estáidentificado por un código único.
+SELECT * FROM historial_transacciones_por_usuario(3);
 
-create table fabricantes 
-(
-codigo int primary key not null,
-nombre varchar(250) not null,
+
+
+--intermedio mostrar primero los comentarios de usuarios en el orden de que hayan llevado m�s cursos a menos
+-- CREATE FUNCTION obtener_comentarios_ordenados_por_cursos()
+--RETURNS TABLE (
+--    comentario_servicio_curso_ID INT,
+--    contenido_comentario_servicio_curso VARCHAR(250)
+--)
+--AS 
+--BEGIN
+--    RETURN (
+--        SELECT c.comentario_servicio_curso_ID, 
+--		c.contenido_comentario_servicio_curso
+--        FROM comentario_servicio_curso c
+--        JOIN comentario_por_servicio_curso cp 
+--		ON c.comentario_servicio_curso_ID = cp.comentario_servicio_curso_comentario_servicio_curso_ID
+--        JOIN servicio_curso sc 
+--		ON cp.servicio_curso_servicio_curso_ID = sc.servicio_curso_ID
+--        JOIN usuario u ON sc.usuario_usuario_ID = u.usuario_ID
+--        GROUP BY 
+--		c.comentario_servicio_curso_ID,
+--		c.contenido_comentario_servicio_curso
+--        ORDER BY COUNT(sc.servicio_curso_ID) DESC
+--    );
+--END;
+
+CREATE FUNCTION obtener_comentarios_ordenados_por_cursos()
+RETURNS @tabla TABLE (
+    comentario_servicio_curso_ID INT,
+    contenido_comentario_servicio_curso VARCHAR(250)
 )
+AS
+BEGIN
+INSERT INTO @tabla
+        SELECT c.comentario_servicio_curso_ID, 
+		c.contenido_comentario_servicio_curso
+        FROM comentario_servicio_curso c
+        JOIN comentario_por_servicio_curso cp 
+		ON c.comentario_servicio_curso_ID = cp.comentario_servicio_curso_comentario_servicio_curso_ID
+        JOIN servicio_curso sc 
+		ON cp.servicio_curso_servicio_curso_ID = sc.servicio_curso_ID
+        JOIN usuario u ON sc.usuario_usuario_ID = u.usuario_ID
+        GROUP BY 
+		c.comentario_servicio_curso_ID,
+		c.contenido_comentario_servicio_curso
+        ORDER BY COUNT(sc.servicio_curso_ID) DESC
+		return
 
---Los modelos de celulares también son almacenados en la empresa. De los modelos se almacena su
---nombre, código SAP, fecha de lanzamiento, color y fabricante.
+END;
 
-create table modelos_celulares 
-(
-codigo int primary key not null,
-nombre varchar (250) not null,
-codigo_sap varchar (250) not null,
-fecha_lanzamiento date not null,
-color varchar (250) not null,
-codigo_fabricante int FOREIGN KEY REFERENCES fabricantes (codigo),
-)
-
---La campaña tiene un código, descripción de campaña,
---fecha de creación, empleado responsable y una fecha de caducidad.
-
-create table Campanias 
-(
-codigo int primary key not null,
-descripcion varchar(250) not null,
-fecha_creación date not null,
-empleado varchar(250) not null,
-fecha_caducidad date not null,
-)
-
-CREATE TABLE Lineas 
-(
-codigo int PRIMARY KEY NOT NULL,
-num_telefono varchar(10) NOT NULL,
-zona varchar(250) NOT NULL,
-)
-
-CREATE TABLE Tipos_Lineas
-(
-codigo int PRIMARY KEY NOT NULL,
-descripcion varchar(250) NOT NULL,
-)
-
-CREATE TABLE Clientes
-(
-codigo int primary key not null,
-nombre varchar(250) not null,
-dni varchar(8) not null,
-direccion varchar(250) not null,
-email varchar(250) not null,
-)
-
-CREATE TABLE Promociones
-(
-codigo int PRIMARY KEY NOT NULL,
-codigo_campania int FOREIGN KEY REFERENCES Campanias (codigo) NOT NULL,
-codigo_plan int FOREIGN KEY REFERENCES planes_tarifarios(codigo) NOT NULL,
-codigo_modelo int FOREIGN KEY REFERENCES modelos_celulares(codigo) NOT NULL,
-fecha_promocion date NOT NULL,
-precio int NOT NULL,
-descuento decimal NOT NULL,
-)
-
-CREATE TABLE Compras
-(
-codigo int PRIMARY KEY NOT NULL,
-codigo_cliente int FOREIGN KEY REFERENCES Clientes (codigo) NOT NULL,
-codigo_promocion int FOREIGN KEY REFERENCES Promociones(codigo) NOT NULL,
-codigo_linea int FOREIGN KEY REFERENCES Lineas(codigo) NOT NULL,
-codigo_tipo_linea int FOREIGN KEY REFERENCES Tipos_Lineas(codigo) NOT NULL,
-servicios varchar(250) NOT NULL,
-monto int NOT NULL,
-fecha_compra date NOT NULL,
-)
-
---Cree las sentencias que permita insertar por lo menos cinco (5) registros en dos (2) de las tablas creadas en
---la pregunta 1.
-SELECT*FROM Campanias
-INSERT INTO Campanias(codigo, descripcion, fecha_creación, empleado, fecha_caducidad)
-VALUES
-(1, 'Campaña de verano', '2023-11-08', 'Juan Lopez', '2023-11-20'),
-(2, 'Campaña escolar', '2023-11-05', 'Anita Kim', '2023-11-09'),
-(3, 'Campaña de verano', '2023-11-08', 'Juan Lopez', '2023-11-20'),
-(4, 'Campaña de verano', '2023-11-08', 'Juan Lopez', '2023-11-20'),
-(5, 'Campaña de verano', '2023-11-08', 'Juan Lopez', '2023-11-20');
-
-SELECT*FROM Clientes
-INSERT INTO Clientes(codigo, nombre, dni, direccion, email)
-VALUES
-(1, 'Lucero Jamil', '71418561', 'Calle Crisantemos', 'lujam@example.com'),
-(2, 'Campaña escolar', '12345678', 'Anita Kim', '2023-11-09'),
-(3, 'Campaña de verano', '85962145', 'Juan Lopez', '2023-11-20'),
-(4, 'Campaña de verano', '25631498', 'Juan Lopez', '2023-11-20'),
-(5, 'Campaña de verano', '95742035', 'Juan Lopez', '2023-11-20');
-
-SELECT*FROM fabricantes
-INSERT INTO fabricantes (codigo, nombre)
-VALUES
-(1, 'Lucero'),
-(2, 'Camp'),
-(3, 'Lucero');
+SELECT * FROM obtener_comentarios_ordenados_por_cursos();
 
 
---Diseñar la función o procedimiento almacenado que permita determinar la cantidad de modelos de celulares
---desarrollados por fabricante para un determinado año (considerar la fecha de lanzamiento). El año es
---ingresado como parámetro.
+--mostrar notificaciones para el usuario de acuerdo al tiempo
+--CREATE PROCEDURE MostrarNotificaciones(@usuarioID INT)
+--RETURN @tabla TABLE (
+--	usuario_id int,
+--	descripcion_notificacion_servicio_curso varchar(250),
+--	fecha_notificacion date,
+--	hora_notificacion time,
+--)
+--AS
+--BEGIN
+--    DECLARE @FechaActual DATE = GETDATE();
+--    DECLARE @HoraActual TIME = GETDATE();
 
---Procedimiento
+--    -- Notificaciones para los cursos
+--    SELECT descripcion_notificacion_servicio_curso, fecha_notificacion, hora_notificacion
+--    FROM notificacion_servicio_curso
+--    WHERE servicio_curso_servicio_curso_ID IN (
+--        SELECT servicio_curso_ID
+--        FROM servicio_curso
+--        WHERE usuario_usuario_ID = @usuarioID
+--    )
+--    AND fecha_notificacion = @FechaActual
+--    AND hora_notificacion > @HoraActual;
 
-Create Function cant_model (@anio int)
-returns table
-return
-	(SELECT F.nombre, COUNT(M.codigo) AS Cantidad
-	FROM fabricantes F
-	JOIN modelos_celulares M ON F.codigo = M.codigo_fabricante
-	WHERE year(M.fecha_lanzamiento) = @anio 
-	GROUP BY F.nombre)
+--    -- Notificaciones para administraci�n financiera
+--    SELECT descripcion_notificacion_administracion_financiera, fecha_notificacion, hora_notificacion
+--    FROM notificacion_administracion_financiera
+--    WHERE servicio_administracion_financiera_servicio_administracion_financiera_ID IN (
+--        SELECT servicio_administracion_financiera_ID
+--        FROM servicio_administracion_financiera
+--        WHERE usuario_usuario_ID = @usuarioID
+--    )
+--    AND fecha_notificacion = @FechaActual
+--    AND hora_notificacion > @HoraActual;
+--END;
 
-select * from dbo.cant_model(2003)
+--exec MostrarNotificaciones(1);
+CREATE FUNCTION dbo.Mostricaciones(@usuarioID INT)
+RETURNS TABLE
+AS
+RETURN (
+    SELECT ns.descripcion_notificacion_servicio_curso, ns.fecha_notificacion, ns.hora_notificacion
+    FROM notificacion_servicio_curso ns
+    INNER JOIN servicio_curso sc ON ns.servicio_curso_servicio_curso_ID = sc.servicio_curso_ID
+    INNER JOIN usuario u ON sc.usuario_usuario_ID = u.usuario_ID
+    WHERE u.usuario_ID = @usuarioID
+    AND ns.fecha_notificacion = CONVERT(DATE, GETDATE())
+    AND ns.hora_notificacion > CONVERT(TIME, GETDATE())
 
---• Diseñar la función o procedimiento almacenado que retorne el nombre de el(los) cliente(s) que más compras
---en línea realizó durante un determinado año (considerar la fecha de compra). El año es ingresado como
---parámetro.
+    UNION ALL
 
-Create Function clientes_compras (@anio int)
-returns table
-return
-	(SELECT C.nombre, COUNT(CO.codigo) AS Cantidad
-	FROM Clientes C
-	JOIN Compras CO ON C.codigo = CO.codigo_cliente
-	WHERE CO.codigo_linea=1 
-	AND year(CO.fecha_compra) = @anio 
-	GROUP BY C.nombre)
-
-select * from dbo.clientes_compras(2003)
-
-create procedure mas_compras (@anio int)
-as
- Begin
-   select nombre
-    from dbo.clientes_compras(@anio)
-	where cantidad = (select max (cantidad) 
-	                   from dbo.clientes_compras(@anio))
- End;
-
-Exec mas_compras 2003
-
---Diseñar la función o procedimiento almacenado que permita determinar el(los) cliente(s) que no realizaron
---ninguna compra en línea durante un determinado año (considerar la fecha de compra). El año es ingresado
---como parámetro.
-
-Create Function clientes_compras (@anio int)
-returns table
-return
-	(SELECT C.nombre, COUNT(CO.codigo) AS Cantidad
-	FROM Clientes C
-	JOIN Compras CO ON C.codigo = CO.codigo_cliente
-	WHERE CO.codigo_linea= 0
-	AND year(CO.fecha_compra) = @anio 
-	GROUP BY C.nombre)
-
-select * from dbo.clientes_compras(2003)
-
---Diseñar la función o procedimiento almacenado que permita determinar la(las) promoción(es)
---(código_promoción), descripción de campaña, con la mayor cantidad de compras en línea para un
---determinado mes de un determinado año (considerar la fecha de compra). El año y mes son ingresados como
---parámetros.
-
-Create Function clientes_compras (@anio int)
-returns table
-return
-	(SELECT C.nombre, COUNT(CO.codigo) AS Cantidad
-	FROM Clientes C
-	JOIN Compras CO ON C.codigo = CO.codigo_cliente
-	WHERE CO.codigo_linea=1 
-	AND year(CO.fecha_compra) = @anio 
-	GROUP BY C.nombre)
-
-select * from dbo.clientes_compras(2003)
-
----Diseñar el procedimiento almacenado que permita imprimir las compras en línea (código_compra) y el
---monto pagado (monto_compra) por cada cliente (nombre de cliente) para un determinado año (considerar la
---fecha de compra realizada).
+    SELECT naf.descripcion_notificacion_administracion_financiera, naf.fecha_notificacion, naf.hora_notificacion
+    FROM notificacion_administracion_financiera naf
+    INNER JOIN servicio_administracion_financiera saf 
+	ON naf.servicio_administracion_financiera_servicio_administracion_financiera_ID = saf.servicio_administracion_financiera_ID
+    INNER JOIN usuario u ON saf.usuario_usuario_ID = u.usuario_ID
+    WHERE u.usuario_ID = @usuarioID
+    AND naf.fecha_notificacion = CONVERT(DATE, GETDATE())
+    AND naf.hora_notificacion > CONVERT(TIME, GETDATE())
+);
