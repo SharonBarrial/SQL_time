@@ -30,7 +30,7 @@ comentarios varchar(250) not null,
 cod_usuarios int FOREIGN KEY REFERENCES usuarios(usuariosID) default,
 cod_curso int FOREIGN KEY REFERENCES cursos(cursosID) default,
 )
-"""
-Esquema
-He considerado para mi esquema cod_usuarios y cod_cursos como foreign key. Y mis primary key not null usuariosid, cursosid y reatrolimentacionesid.
-"""
+------------
+--Esquema
+--He considerado para mi esquema cod_usuarios y cod_cursos como foreign key. Y mis primary key not null usuariosid, cursosid y reatrolimentacionesid.
+-----------
