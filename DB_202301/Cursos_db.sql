@@ -1,4 +1,4 @@
-"""foros"""
+--"""foros"""
 create function cursos_foros(@anio int)
 	returns table
 	(nombre_curso varchar(255),anio int, cantidad_foros int) 
@@ -43,7 +43,7 @@ AS
 END;
 
 
-"""lecciones"""
+--"""lecciones"""
 Create Function cursos_lecciones_categoroa (@categoria varchar(250))
 returns table
 return
@@ -66,7 +66,7 @@ as
 
 Exec cursos_lecciones_categoroas ('arte')
 
-"""leccionesxcategorias"""
+--"""leccionesxcategorias"""
 create Function cursos_lecciones_categoroas(@anio int)
 returns table
 return
@@ -90,7 +90,7 @@ as
 
 Exec cursos_lecciones_categoroas 2003
   
-"""precios"""
+--"""precios"""
 SELECT nombre, precio
 FROM cursos
 WHERE precio > (
@@ -100,7 +100,7 @@ WHERE precio > (
 
 select * from cursos
 
-"""usuarios"""
+--"""usuarios"""
 SELECT*FROM usuarios
 INSERT INTO usuarios(usuariosID,nombre,apellido, num_telef,email,contraseña)
 VALUES
